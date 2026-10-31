@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, ChevronLeft, LogOut, Store, X } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { Menu, ChevronLeft, Store, X } from "lucide-react";
 import { menuItems } from "../data/menu";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
-
-  function signOut() {
-    navigate("/login");
-    setMobileOpen(false);
-  }
+  const role=localStorage.getItem("shopflow.currentRole")||"Administrator";
+  const employeeMode=role==="Employee"||role==="Sales";
+  const employeePaths=["/employee-dashboard","/challan","/sale","/stock","/customer","/pre-order","/expense","/reports","/profile"];
+  const visibleItems=employeeMode?menuItems.filter(item=>employeePaths.includes(item.path)):menuItems;
 
   return (
     <>
@@ -27,7 +25,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
         <div className="nav-caption">{!collapsed && "WORKSPACE"}</div>
         <nav className="sidebar-nav">
-          {menuItems.map(({ label, path, icon: Icon, children }) => (
+          {visibleItems.map(({ label, path, icon: Icon, children }) => (
             <div className="nav-group" key={path}>
               <NavLink to={path} title={collapsed ? label : undefined} className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={() => setMobileOpen(false)}>
                 <Icon size={19} strokeWidth={1.9} />
@@ -38,12 +36,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
             </div>
           ))}
         </nav>
-        <div className="sidebar-bottom">
-          <button className="nav-link signout-link" onClick={signOut} title={collapsed ? "Sign Out" : undefined}>
-            <LogOut size={19} /><span className={collapsed ? "sr-only" : ""}>Sign Out</span>
-          </button>
-          {!collapsed && <div className="sidebar-footnote">© 2026 ShopFlow<br />Built for your business</div>}
-        </div>
+
       </aside>
     </>
   );

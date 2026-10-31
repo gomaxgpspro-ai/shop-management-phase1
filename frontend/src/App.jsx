@@ -6,7 +6,11 @@ import AccountsPage from "./pages/Accounts";
 import ProductPage from "./pages/Product";
 import PeoplePage from "./pages/People";
 import CommercePage from "./pages/Commerce";
+import PurchaseWorkspace from "./pages/PurchaseWorkspace";
+import VehiclePage from "./pages/Vehicle";
+import DailyRentPage from "./pages/DailyRent";
 import { Login, Register } from "./pages/Auth";
+import { DueLedger, ExpensePage, PreOrderPage, UserManagement, EmployeeDashboard, ProfilePage, SettingsPage } from "./pages/Workflows";
 
 const pages = [
   ["Accounts", "/accounts", "Review account workspace UI. Account transactions will be added in a later phase."],
@@ -39,9 +43,16 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/due-payment-ledger" element={<DueLedger />} />
+        <Route path="/expense" element={<ExpensePage />} />
+        <Route path="/pre-order" element={<PreOrderPage />} />
+        <Route path="/users" element={<UserManagement />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/setting" element={<SettingsPage />} />
+        <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
         <Route path="/accounts/*" element={<AccountsPage startView="dashboard" />} />
-        <Route path="/product" element={<ProductPage />} />
-        <Route path="/purchase" element={<CommercePage mode="purchase" />} />
+        <Route path="/product" element={<Navigate to="/purchase" replace />} />
+        <Route path="/purchase" element={<PurchaseWorkspace />} />
         <Route path="/stock" element={<CommercePage mode="stock" />} />
         <Route path="/sale/*" element={<CommercePage mode="sale" />} />
         <Route path="/sale/installment" element={<CommercePage mode="sale" />} />
@@ -49,8 +60,10 @@ export default function App() {
         <Route path="/customer" element={<PeoplePage type="customer" />} />
         <Route path="/vendor" element={<PeoplePage type="vendor" />} />
         <Route path="/employee" element={<PeoplePage type="employee" />} />
+        <Route path="/vehicle" element={<VehiclePage />} />
+        <Route path="/daily-rent-collection" element={<DailyRentPage />} />
         <Route path="/reports" element={<AccountsPage startView="reports" />} />
-        {pages.filter(([, path]) => !["/accounts", "/reports", "/product", "/customer", "/vendor", "/employee", "/purchase", "/stock", "/sale", "/challan"].includes(path)).map(([title, path, description]) => <Route key={path} path={path} element={<PlaceholderPage title={title} description={description} />} />)}
+        {pages.filter(([, path]) => !["/accounts", "/reports", "/product", "/customer", "/vendor", "/employee", "/purchase", "/stock", "/sale", "/challan", "/due-payment-ledger", "/expense", "/pre-order", "/users", "/employee-dashboard", "/profile", "/setting"].includes(path)).map(([title, path, description]) => <Route key={path} path={path} element={<PlaceholderPage title={title} description={description} />} />)}
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

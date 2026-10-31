@@ -3,7 +3,7 @@ import { Plus, Search, Package, Pencil, Trash2, X, CheckCircle2, CircleOff, Boxe
 
 const STORAGE_KEY = "shopflow.products.v1";
 const units = ["pcs", "kg", "set", "carton", "ltr", "meter", "feet", "box", "dozen", "pack", "roll", "pair", "gram", "ton", "other"];
-const blankForm = { name: "", category: "", unit: "pcs", purchasePrice: "", status: "Active" };
+const blankForm = { name: "", category: "", unit: "pcs", purchasePrice: "", status: "Active", image: "", lowStockAlert: "5" };
 
 function loadProducts() {
   try {
@@ -41,14 +41,14 @@ export default function ProductPage() {
   }
   function openEdit(product) {
     setEditingId(product.id);
-    setForm({ name: product.name || "", category: product.category || "", unit: product.unit || "pcs", purchasePrice: String(product.purchasePrice ?? ""), status: product.status || "Active" });
+    setForm({ name: product.name || "", category: product.category || "", unit: product.unit || "pcs", purchasePrice: String(product.purchasePrice ?? ""), status: product.status || "Active", image: product.image || "", lowStockAlert: String(product.lowStockAlert ?? 5) });
     setError(""); setModalOpen(true);
   }
   function saveProduct(event) {
     event.preventDefault();
     if (!form.name.trim()) { setError("Product name is required."); return; }
     if (form.purchasePrice === "" || !Number.isFinite(Number(form.purchasePrice)) || Number(form.purchasePrice) < 0) { setError("Enter a valid purchase price."); return; }
-    const product = { id: editingId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: form.name.trim(), category: form.category.trim(), unit: form.unit, purchasePrice: Number(form.purchasePrice), status: form.status };
+    const product = { id: editingId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: form.name.trim(), category: form.category.trim(), unit: form.unit, purchasePrice: Number(form.purchasePrice), status: form.status, image: form.image || "", lowStockAlert: Math.max(0, Number(form.lowStockAlert || 5)) };
     setProducts((prev) => editingId ? prev.map((p) => p.id === editingId ? product : p) : [...prev, product]);
     setModalOpen(false); setForm(blankForm); setEditingId(null); setError("");
   }
@@ -82,11 +82,11 @@ export default function ProductPage() {
         </div>
         <div className="product-table-wrap">
           <table className="data-table product-table">
-            <thead><tr><th>SL</th><th>Name</th><th>Category</th><th>Unit</th><th>Purchase Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>SL</th><th>Product</th><th>Category</th><th>Unit</th><th>Purchase Price</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {filteredProducts.map((product, index) => <tr key={product.id}>
                 <td>{index + 1}</td>
-                <td><strong className="product-name-cell">{product.name}</strong></td>
+                <td><div className="product-image-name">{product.image ? <img src={product.image} alt={product.name}/> : <span><Package size={18}/></span>}<strong className="product-name-cell">{product.name}</strong></div></td>
                 <td>{product.category || <span className="product-muted">—</span>}</td>
                 <td><span className="product-unit-pill">{product.unit}</span></td>
                 <td><strong className="product-price-cell">{money(product.purchasePrice)}</strong></td>
@@ -108,6 +108,8 @@ export default function ProductPage() {
               <label>Category<input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Electronics" /></label>
               <label>Unit <span>*</span><select value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}>{units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select></label>
               <label>Purchase Price (৳) <span>*</span><input type="number" min="0" step="0.01" value={form.purchasePrice} onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })} placeholder="0.00" /></label>
+              <label>Low Stock Alert<input type="number" min="0" value={form.lowStockAlert ?? "5"} onChange={(e) => setForm({ ...form, lowStockAlert: e.target.value })} /></label>
+              <label className="product-image-upload">Product Image<input type="file" accept="image/*" onChange={(e)=>{const file=e.target.files?.[0];if(!file)return;if(file.size>1*1024*1024){setError("Product image must be 1 MB or smaller.");return;}const reader=new FileReader();reader.onload=()=>setForm(prev=>({...prev,image:String(reader.result||"")}));reader.readAsDataURL(file);}}/>{form.image&&<img className="product-upload-preview" src={form.image} alt="Product preview"/>}</label>
               <label>Status<select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>Inactive</option></select></label>
             </div>
             {error && <p className="product-form-error">{error}</p>}
